@@ -1,5 +1,7 @@
 # Game Trade-off Stimulation
 
+The dominant play area is a CSS-only isometric architecture scene: Client, App Server, Database, Replica, and Shard objects are selectable buttons, while decorative request/data packets communicate the current simulation phase. Its composition is a spacious dark playfield with centered system objects, a floating mission/task card, a left tool rail, top telemetry, bottom simulation controls, and a tactical-map minimap treatment. Replica and shard objects are presentation projections of the existing Database node, so selecting them opens the same deterministic database detail and does not create new simulation behavior. The scene uses CSS perspective rather than WebGL or a new rendering dependency. Native buttons, focus states, and the existing play/step/reset controls provide the accessible keyboard fallback; reduced-motion users keep the same topology without animation.
+
 ## Documents
 
 - [Feature 1: Game shell](features/game-shell.md)

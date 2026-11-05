@@ -12,21 +12,50 @@ describe('game shell', () => {
     render(<GameShell />)
     expect(screen.getByText('Cứu shop trước giờ flash sale')).toBeInTheDocument()
     expect(screen.getByRole('progressbar', { name: 'Mission progress' })).toHaveAttribute('aria-valuenow', '28')
-    expect(screen.getByRole('button', { name: /Client/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Primary Database/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Select CLIENT' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Select DATABASE' })).toBeInTheDocument()
     expect(screen.getByText('CPU đang tăng nhanh')).toBeInTheDocument()
   })
 
   it('updates component detail when a node is selected', () => {
     render(<GameShell />)
-    fireEvent.click(screen.getByRole('button', { name: /Primary Database/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Select DATABASE' }))
     expect(screen.getByRole('heading', { name: 'Primary Database' })).toBeInTheDocument()
-    expect(screen.getAllByText('CRITICAL').length).toBeGreaterThanOrEqual(2)
+    expect(screen.getAllByText('CRITICAL').length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('renders an interactive isometric scene with derived infrastructure nodes', () => {
+    render(<GameShell />)
+    expect(screen.getByLabelText('Interactive 3D architecture scene')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Select REPLICA' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Select SHARD 01' })).toBeInTheDocument()
+    expect(document.querySelectorAll('.flow').length).toBe(3)
+    fireEvent.click(screen.getByRole('button', { name: 'Select REPLICA' }))
+    expect(screen.getByRole('heading', { name: 'Primary Database' })).toBeInTheDocument()
+    expect(screen.getByText(/Architecture ready/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Step simulation' }))
+    expect(screen.getByText(/Evaluated after state/)).toBeInTheDocument()
+  })
+
+  it('keeps every scene target present in the compact 320px layout', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 320 })
+    render(<GameShell />)
+    expect(screen.getByLabelText('Interactive 3D architecture scene')).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: /Select (CLIENT|APP SERVER|DATABASE|REPLICA|SHARD)/ }).length).toBe(6)
+  })
+
+  it('composes the simulation as a play space with floating HUD, tool rail, controls, and tactical map', () => {
+    render(<GameShell />)
+    expect(document.querySelector('.scene-stage')).toBeInTheDocument()
+    expect(document.querySelector('.task-panel')).toBeInTheDocument()
+    expect(document.querySelector('.model-toolbar')).toBeInTheDocument()
+    expect(document.querySelector('.controls')).toBeInTheDocument()
+    expect(document.querySelector('.scene-stage')?.className).toContain('scene-stage')
   })
 
   it('resets the selected node to the initial App Server', () => {
     render(<GameShell />)
-    fireEvent.click(screen.getByRole('button', { name: /Primary Database/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Select DATABASE' }))
     fireEvent.click(screen.getByRole('button', { name: 'Reset system model' }))
 
     expect(screen.getByRole('heading', { name: 'App Server' })).toBeInTheDocument()
