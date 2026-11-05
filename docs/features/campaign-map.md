@@ -6,6 +6,7 @@
 - The first level, **Database overload**, is the only playable level and returns to the existing simulation shell when selected.
 - Later levels are visibly and semantically locked, labeled “Coming soon”, and do not expose invented playable content.
 - The map is responsive, keyboard reachable, dismissible, and uses a modal dialog with an accessible name.
+- Opening the map moves focus to its close control; Escape closes it and restores focus to the opener; Tab and Shift+Tab remain within the modal controls.
 - Existing Feature 5 scenario persistence is reused: a saved `architecture-run:scenario` is shown as local “In progress”; no second progress store is introduced.
 
 ## Assumptions and limits
@@ -17,7 +18,7 @@ Completion is not yet persisted by the MVP, so the map reports saved scenario co
 - `src/game/level.ts`: campaign level metadata.
 - `src/ui/GameShell.tsx`: map navigation, dialog, locked states, and Feature 5 progress signal.
 - `src/ui/styles.css`: responsive map presentation and focus states.
-- `src/ui/GameShell.test.tsx`: map accessibility, locked-level, and saved-progress coverage.
+- `src/ui/GameShell.test.tsx`: map accessibility, focus lifecycle/trap, locked-level, and saved-progress coverage.
 
 ## Checks
 

@@ -57,4 +57,25 @@ describe('game shell', () => {
     expect(screen.getByText('Progress saved locally in this browser.')).toBeInTheDocument()
     expect(screen.getByText('IN PROGRESS')).toBeInTheDocument()
   })
+
+  it('moves focus into the map, traps Tab, and closes on Escape restoring the opener', () => {
+    render(<GameShell />)
+    const opener = screen.getByRole('button', { name: 'Open campaign map' })
+    opener.focus()
+    fireEvent.click(opener)
+    const close = screen.getByRole('button', { name: 'Close campaign map' })
+    const level = screen.getByRole('button', { name: /Database overload/ })
+    expect(document.activeElement).toBe(close)
+
+    level.focus()
+    fireEvent.keyDown(level, { key: 'Tab' })
+    expect(document.activeElement).toBe(close)
+    close.focus()
+    fireEvent.keyDown(close, { key: 'Tab', shiftKey: true })
+    expect(document.activeElement).toBe(level)
+
+    fireEvent.keyDown(level, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(document.activeElement).toBe(opener)
+  })
 })
