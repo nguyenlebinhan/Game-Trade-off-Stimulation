@@ -2,6 +2,7 @@ import { useEffect, useMemo, useReducer, useState } from 'react'
 import { Activity, CircleHelp, Database, Gauge, GitBranch, HardDrive, MousePointer2, Pause, Play, RotateCcw, Server, Settings, ShieldCheck, StepForward, Users } from 'lucide-react'
 import { flashSaleLevel } from '../game/level'
 import { ScenarioConfiguration, simulateScenario } from '../game/simulation-engine'
+import { clearScenario, loadScenario, saveScenario } from '../game/persistence'
 import { createInitialSystemState, systemStateReducer } from '../game/system-model'
 import './simulation.css'
 import './tradeoff-signals.css'
@@ -15,21 +16,23 @@ function MetricCard({ label, value, detail }: { label: string; value: string; de
 
 export function GameShell() {
   const [systemState, dispatch] = useReducer(systemStateReducer, createInitialSystemState())
-  const [scenario, setScenario] = useState<ScenarioConfiguration>(initialScenario)
+  const [scenario, setScenario] = useState<ScenarioConfiguration>(() => loadScenario(window.localStorage, initialScenario))
   const [phase, setPhase] = useState<'before' | 'after'>('before')
   const [running, setRunning] = useState(false)
   const [hasResult, setHasResult] = useState(false)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
+  const [speed, setSpeed] = useState(1)
   const result = useMemo(() => simulateScenario(scenario), [scenario])
   const snapshot = result[phase]
   const selected = systemState.nodes.find((node) => node.id === systemState.selectedNodeId) ?? systemState.nodes[0]
-  useEffect(() => { if (!running) return; const timer = window.setTimeout(() => { setPhase('after'); setHasResult(true); setRunning(false) }, 900); return () => window.clearTimeout(timer) }, [running])
+  useEffect(() => { saveScenario(window.localStorage, scenario) }, [scenario])
+  useEffect(() => { if (!running) return; const timer = window.setTimeout(() => { setPhase('after'); setHasResult(true); setRunning(false) }, 900 / speed); return () => window.clearTimeout(timer) }, [running, speed])
   const changeScenario = (change: (current: ScenarioConfiguration) => ScenarioConfiguration) => { setScenario(change); setPhase('before'); setHasResult(false); setRunning(false) }
   const update = (key: keyof ScenarioConfiguration, value: number) => changeScenario((current) => ({ ...current, [key]: value }))
-  const reset = () => { setScenario(initialScenario); setPhase('before'); setHasResult(false); setRunning(false); setSelectedNodeId(null); dispatch({ type: 'reset' }) }
+  const reset = () => { clearScenario(window.localStorage); setScenario(initialScenario); setPhase('before'); setHasResult(false); setRunning(false); setSelectedNodeId(null); dispatch({ type: 'reset' }) }
   const resetActions = () => changeScenario((current) => ({ ...current, scaleUpCapacity: { readRps: 0, writeRps: 0 }, readReplicas: 0, shardCount: 1, shardDistribution: 'even' }))
   const setDistribution = (kind: 'even' | 'hot-spot') => changeScenario((current) => ({ ...current, shardDistribution: kind === 'even' || current.shardCount === 1 ? 'even' : [0.6, ...Array.from({ length: current.shardCount - 1 }, () => 0.4 / (current.shardCount - 1))] }))
-  return <main className="game-shell">
+  return <main className={`game-shell ${running ? 'simulation-running' : ''}`}>
     <header className="topbar"><div className="brand"><span className="brand-mark">◈</span><span>ARCHITECTURE RUN</span></div><div className="campaign-name">{flashSaleLevel.campaign}</div><div className="top-actions"><span className="status-pill"><span className="dot" /> LIVE</span><button aria-label="Help"><CircleHelp size={18} /></button><button aria-label="Settings"><Settings size={18} /></button></div></header>
     <section className="mission-strip"><div><span className="eyebrow">MISSION 01 / INCIDENT RESPONSE</span><h1>{flashSaleLevel.mission}</h1></div><div className="timer"><span>TIME LEFT</span><strong>{flashSaleLevel.timeRemaining}</strong></div><div className="progress-wrap"><span>PROGRESS</span><div className="progress" role="progressbar" aria-label="Mission progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={flashSaleLevel.progress}><i style={{ width: `${flashSaleLevel.progress}%` }} /></div><b>{flashSaleLevel.progress}%</b></div></section>
     <div className="workspace">
