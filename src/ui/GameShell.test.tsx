@@ -22,6 +22,15 @@ describe('game shell', () => {
     expect(screen.getAllByText('CRITICAL').length).toBeGreaterThanOrEqual(2)
   })
 
+  it('resets the selected node to the initial App Server', () => {
+    render(<GameShell />)
+    fireEvent.click(screen.getByRole('button', { name: /Primary Database/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Reset system model' }))
+
+    expect(screen.getByRole('heading', { name: 'App Server' })).toBeInTheDocument()
+    expect(screen.getByText('CPU đang tăng nhanh')).toBeInTheDocument()
+  })
+
   it('provides an accessible simulation toggle', () => {
     render(<GameShell />)
     const toggle = screen.getByRole('button', { name: 'Start simulation' })

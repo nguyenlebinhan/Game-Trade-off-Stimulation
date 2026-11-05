@@ -3,10 +3,11 @@
 ## Tài liệu
 
 - [Feature 1: Game shell](features/game-shell.md)
+- [Feature 2: System model state](features/system-model.md)
 
 ## Trạng thái
 
-Repository được khởi tạo cùng nền tảng React + TypeScript + Vite. MVP hiện tập trung vào khung màn chơi responsive cho campaign “Cứu shop trước giờ flash sale”; simulation engine chưa bắt đầu.
+Repository dùng React + TypeScript + Vite. MVP hiện có game shell responsive và system model state tái sử dụng được cho campaign “Cứu shop trước giờ flash sale”. Simulation engine và các quy tắc thay đổi topology chưa bắt đầu.
 
 ## Lệnh phát triển
 
