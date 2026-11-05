@@ -58,6 +58,27 @@ describe('game shell', () => {
     expect(screen.getByText('IN PROGRESS')).toBeInTheDocument()
   })
 
+  it('marks Database overload completed after a healthy solution and restores it on reload', () => {
+    render(<GameShell />)
+    fireEvent.change(screen.getByRole('spinbutton', { name: 'Scale-up read capacity' }), { target: { value: '500' } })
+    fireEvent.change(screen.getByRole('spinbutton', { name: 'Scale-up write capacity' }), { target: { value: '1000' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Step simulation' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Open campaign map' }))
+    expect(screen.getByText('COMPLETED')).toBeInTheDocument()
+    expect(window.localStorage.getItem('architecture-run:completion')).toBe('true')
+    cleanup()
+    render(<GameShell />)
+    fireEvent.click(screen.getByRole('button', { name: 'Open campaign map' }))
+    expect(screen.getByText('COMPLETED')).toBeInTheDocument()
+  })
+
+  it('clears completion through the reset path', () => {
+    window.localStorage.setItem('architecture-run:completion', 'true')
+    render(<GameShell />)
+    fireEvent.click(screen.getByRole('button', { name: 'Reset simulation' }))
+    expect(window.localStorage.getItem('architecture-run:completion')).toBeNull()
+  })
+
   it('moves focus into the map, traps Tab, and closes on Escape restoring the opener', () => {
     render(<GameShell />)
     const opener = screen.getByRole('button', { name: 'Open campaign map' })

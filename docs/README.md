@@ -21,3 +21,5 @@ npm run dev
 npm test
 npm run build
 ```
+
+Feature 8 adds local completion persistence for the playable Database overload level. Completion requires a zero-error after-state; future levels remain locked.
