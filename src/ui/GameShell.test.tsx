@@ -8,6 +8,34 @@ afterEach(() => window.localStorage.clear())
 import { GameShell } from './GameShell'
 
 describe('game shell', () => {
+  it('keeps instance IDs unique after deletion and removes connected edges on reset', () => {
+    render(<GameShell />)
+    const instances: { id: string }[][] = []
+    const edges: { source: string; target: string; type: string }[][] = []
+    const onInstances = (event: Event) => instances.push((event as CustomEvent).detail)
+    const onEdges = (event: Event) => edges.push((event as CustomEvent).detail)
+    window.addEventListener('architecture:instances', onInstances)
+    window.addEventListener('architecture:relations', onEdges)
+    try {
+      fireEvent.click(screen.getByRole('button', { name: 'Add App server' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Add App server' }))
+      const [first, second] = instances.at(-1)!
+      fireEvent(window, new CustomEvent('architecture:select', { detail: first.id }))
+      fireEvent.click(screen.getByRole('button', { name: 'Remove App server' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Add App server' }))
+      const next = instances.at(-1)!
+      expect(new Set(next.map((item) => item.id)).size).toBe(2)
+      expect(next[0].id).toBe(second.id)
+      fireEvent(window, new CustomEvent('architecture:connect', { detail: { source: next[0].id, target: next[1].id } }))
+      expect(edges.at(-1)).toEqual([{ source: next[0].id, target: next[1].id, type: 'app-server-to-app-server' }])
+      fireEvent.click(screen.getByRole('button', { name: 'Reset simulation' }))
+      expect(edges.at(-1)).toEqual([])
+      expect(instances.at(-1)).toEqual([])
+    } finally {
+      window.removeEventListener('architecture:instances', onInstances)
+      window.removeEventListener('architecture:relations', onEdges)
+    }
+  })
   it('renders the campaign mission and core system nodes', () => {
     render(<GameShell />)
     expect(screen.getByText('Cứu shop trước giờ flash sale')).toBeInTheDocument()
@@ -37,6 +65,13 @@ describe('game shell', () => {
     expect(screen.getByText(/Evaluated after state/)).toBeInTheDocument()
   })
 
+  it('keeps the semantic scene fallback available while the mesh renderer is deferred', () => {
+    render(<GameShell />)
+    expect(screen.getByLabelText('Interactive 3D architecture scene')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Select CLIENT' })).toBeInTheDocument()
+    expect(document.querySelector('.three-layer')).not.toBeInTheDocument()
+  })
+
   it('keeps every scene target present in the compact 320px layout', () => {
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 320 })
     render(<GameShell />)
@@ -51,6 +86,17 @@ describe('game shell', () => {
     expect(document.querySelector('.model-toolbar')).toBeInTheDocument()
     expect(document.querySelector('.controls')).toBeInTheDocument()
     expect(document.querySelector('.scene-stage')?.className).toContain('scene-stage')
+  })
+
+  it('adds a role mesh through the accessible palette and exposes its inspector', () => {
+    render(<GameShell />)
+    fireEvent.click(screen.getByRole('button', { name: 'Add App server' }))
+    expect(screen.getByRole('region', { name: 'Architecture palette' })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Placed element inspector' })).toBeInTheDocument()
+    fireEvent.change(screen.getByRole('spinbutton', { name: 'Element capacity' }), { target: { value: '900' } })
+    expect(screen.getByRole('spinbutton', { name: 'Element capacity' })).toHaveValue(900)
+    fireEvent.click(screen.getByRole('button', { name: 'Remove App server' }))
+    expect(screen.queryByRole('region', { name: 'Placed element inspector' })).not.toBeInTheDocument()
   })
 
   it('resets the selected node to the initial App Server', () => {
