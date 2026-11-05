@@ -5,7 +5,7 @@ and software WebGL. This is browser verification, not a physical-device claim.
 
 ## Renderer loading and fallback
 
-The Three.js renderer is a lazy dynamic import. Against verified base `67fe4206f408e7dab385e1acfc83bea3b32f8b65`, the clean build's initial JavaScript decreased from 821.31 kB (219.88 kB gzip) to 260.93 kB (81.65 kB gzip). The deferred renderer chunk is 561.76 kB (138.89 kB gzip). The CSS scene and semantic buttons are available while that chunk loads and remain the usable fallback when WebGL is absent or renderer creation fails.
+The Three.js renderer is a lazy dynamic import. Against verified base `67fe4206f408e7dab385e1acfc83bea3b32f8b65`, comparable clean-build measurements are: base initial JavaScript 254.52 kB (79.63 kB gzip), post-split initial JavaScript 260.93 kB (81.65 kB gzip), and deferred renderer chunk 561.76 kB (138.89 kB gzip). The CSS scene and semantic buttons are available while that chunk loads and remain the usable fallback when WebGL is absent or renderer creation fails.
 
 The browser initially used a 980px layout because the entry document had no
 viewport metadata. Adding that metadata and loading final world layout rules
