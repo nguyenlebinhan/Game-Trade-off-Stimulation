@@ -1,6 +1,7 @@
 import type { ScenarioConfiguration } from './simulation-engine'
 
 export const scenarioStorageKey = 'architecture-run:scenario'
+export const completionStorageKey = 'architecture-run:completion'
 
 function isValidScenario(value: unknown): value is ScenarioConfiguration {
   if (!value || typeof value !== 'object') return false
@@ -28,3 +29,6 @@ export function saveScenario(storage: Storage | undefined, scenario: ScenarioCon
 }
 
 export function clearScenario(storage: Storage | undefined) { storage?.removeItem(scenarioStorageKey) }
+export function loadCompletion(storage: Storage | undefined): boolean { try { return JSON.parse(storage?.getItem(completionStorageKey) ?? 'false') === true } catch { return false } }
+export function saveCompletion(storage: Storage | undefined) { storage?.setItem(completionStorageKey, 'true') }
+export function clearCompletion(storage: Storage | undefined) { storage?.removeItem(completionStorageKey) }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { clearScenario, loadScenario, saveScenario } from './persistence'
+import { clearCompletion, clearScenario, loadCompletion, loadScenario, saveCompletion, saveScenario } from './persistence'
 import type { ScenarioConfiguration } from './simulation-engine'
 
 const scenario: ScenarioConfiguration = { requestsPerSecond: 900, readRatio: 0.6, dbCapacity: { readRps: 500, writeRps: 180 }, scaleUpCapacity: { readRps: 100, writeRps: 0 }, readReplicas: 1, shardCount: 1, shardDistribution: 'even' }
@@ -26,6 +26,25 @@ describe('scenario persistence', () => {
     const storage = new StorageMock()
     storage.setItem('architecture-run:scenario', saved)
     expect(loadScenario(storage, scenario)).toBe(scenario)
+  })
+})
+
+describe('level completion persistence', () => {
+  it('round-trips completion and tolerates malformed state', () => {
+    const storage = new StorageMock()
+    expect(loadCompletion(storage)).toBe(false)
+    saveCompletion(storage)
+    expect(loadCompletion(storage)).toBe(true)
+    storage.setItem('architecture-run:completion', '{bad json')
+    expect(loadCompletion(storage)).toBe(false)
+    storage.setItem('architecture-run:completion', '"true"')
+    expect(loadCompletion(storage)).toBe(false)
+  })
+  it('clears completion state for reset', () => {
+    const storage = new StorageMock()
+    saveCompletion(storage)
+    clearCompletion(storage)
+    expect(loadCompletion(storage)).toBe(false)
   })
 })
 

@@ -1,6 +1,6 @@
 # Game Trade-off Stimulation
 
-## Tài liệu
+## Documents
 
 - [Feature 1: Game shell](features/game-shell.md)
 - [Feature 2: System model state](features/system-model.md)
@@ -8,12 +8,13 @@
 - [Feature 4: Metrics and explanations UI](features/metrics-and-explanations.md)
 - [Feature 5: Simulation playback and campaign persistence](features/simulation-playback.md)
 - [Feature 7: Campaign map](features/campaign-map.md)
+- [Feature 8: Campaign completion persistence](features/campaign-progress.md)
 
-## Trạng thái
+## Status
 
-Repository dùng React + TypeScript + Vite. MVP hiện có game shell responsive, campaign map cho **Cứu shop trước giờ flash sale** với Database overload playable và các level sau locked/coming soon, system model state tái sử dụng được, simulation engine deterministic và UI tích hợp cho workload, architecture actions, purposeful playback animation, run/step/pause/reset, metrics trước/sau, explanations và validated localStorage persistence cho campaign configuration. Feature 7 chỉ hiển thị tiến trình “In progress” khi cấu hình Feature 5 đã được lưu; completion persistence và nội dung level sau vẫn deferred.
+The MVP uses React, TypeScript, and Vite. It includes a responsive game shell, an accessible campaign map for the flash-sale campaign, a playable Database overload level, deterministic simulation, architecture actions, playback controls, metrics, explanations, and validated localStorage persistence for scenario configuration and level completion. Completion is recorded only when the playable level's after-state has zero errors; future levels remain locked.
 
-## Lệnh phát triển
+## Development
 
 ```bash
 npm install
