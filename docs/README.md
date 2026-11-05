@@ -4,10 +4,11 @@
 
 - [Feature 1: Game shell](features/game-shell.md)
 - [Feature 2: System model state](features/system-model.md)
+- [Feature 3: Deterministic simulation engine](features/simulation-engine.md)
 
 ## Trạng thái
 
-Repository dùng React + TypeScript + Vite. MVP hiện có game shell responsive và system model state tái sử dụng được cho campaign “Cứu shop trước giờ flash sale”. Simulation engine và các quy tắc thay đổi topology chưa bắt đầu.
+Repository dùng React + TypeScript + Vite. MVP hiện có game shell responsive, system model state tái sử dụng được và simulation engine deterministic cho capacity/replica/sharding trade-offs. UI metrics và animation/time-step controls chưa được tích hợp.
 
 ## Lệnh phát triển
 
