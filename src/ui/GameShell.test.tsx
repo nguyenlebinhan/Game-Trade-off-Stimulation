@@ -1,8 +1,10 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { fireEvent } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 afterEach(cleanup)
+beforeEach(() => window.localStorage.clear())
+afterEach(() => window.localStorage.clear())
 import { GameShell } from './GameShell'
 
 describe('game shell', () => {
@@ -36,5 +38,44 @@ describe('game shell', () => {
     const toggle = screen.getByRole('button', { name: 'Start simulation' })
     fireEvent.click(toggle)
     expect(screen.getByRole('button', { name: 'Pause simulation' })).toBeInTheDocument()
+  })
+
+  it('opens an accessible campaign map with one playable level and locked future levels', () => {
+    render(<GameShell />)
+    fireEvent.click(screen.getByRole('button', { name: 'Open campaign map' }))
+    expect(screen.getByRole('dialog', { name: 'Cứu shop trước giờ flash sale' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Database overload/ })).toBeInTheDocument()
+    expect(screen.getByLabelText('Cache storm, locked, coming soon')).toBeInTheDocument()
+    expect(screen.getByLabelText('Queue backlog, locked, coming soon')).toBeInTheDocument()
+    expect(screen.getByText('Progress saved locally in this browser.')).toBeInTheDocument()
+  })
+
+  it('shows Feature 5 saved scenario progress in the map', () => {
+    window.localStorage.setItem('architecture-run:scenario', JSON.stringify({ requestsPerSecond: 1240, readRatio: 0.75, dbCapacity: { readRps: 500, writeRps: 180 }, scaleUpCapacity: { readRps: 0, writeRps: 0 }, readReplicas: 0, shardCount: 1, shardDistribution: 'even' }))
+    render(<GameShell />)
+    fireEvent.click(screen.getByRole('button', { name: 'Open campaign map' }))
+    expect(screen.getByText('Progress saved locally in this browser.')).toBeInTheDocument()
+    expect(screen.getByText('IN PROGRESS')).toBeInTheDocument()
+  })
+
+  it('moves focus into the map, traps Tab, and closes on Escape restoring the opener', () => {
+    render(<GameShell />)
+    const opener = screen.getByRole('button', { name: 'Open campaign map' })
+    opener.focus()
+    fireEvent.click(opener)
+    const close = screen.getByRole('button', { name: 'Close campaign map' })
+    const level = screen.getByRole('button', { name: /Database overload/ })
+    expect(document.activeElement).toBe(close)
+
+    level.focus()
+    fireEvent.keyDown(level, { key: 'Tab' })
+    expect(document.activeElement).toBe(close)
+    close.focus()
+    fireEvent.keyDown(close, { key: 'Tab', shiftKey: true })
+    expect(document.activeElement).toBe(level)
+
+    fireEvent.keyDown(level, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(document.activeElement).toBe(opener)
   })
 })
