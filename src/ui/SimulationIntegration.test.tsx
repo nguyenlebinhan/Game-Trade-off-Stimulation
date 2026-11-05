@@ -1,10 +1,11 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { act, cleanup, render, screen } from '@testing-library/react'
 import { fireEvent } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { GameShell } from './GameShell'
 
 afterEach(cleanup)
+afterEach(() => { window.localStorage.clear(); vi.useRealTimers() })
 
 describe('Feature 4 simulation UI integration', () => {
   it('lets the user start and pause the simulation from the control bar', () => {
@@ -19,9 +20,29 @@ describe('Feature 4 simulation UI integration', () => {
     expect(screen.getByText('Ready to simulate')).toBeInTheDocument()
   })
 
-  it.todo('steps the simulation once and exposes the resulting metrics and events')
+  it('steps once and exposes deterministic results', () => {
+    render(<GameShell />)
+    fireEvent.click(screen.getByRole('button', { name: 'Step simulation' }))
+    expect(screen.getByText('Architecture evaluated')).toBeInTheDocument()
+    expect(screen.getByText('Simulation results')).toBeInTheDocument()
+  })
 
-  it.todo('shows before/after summary metrics and the quick explanation after a run')
+  it('runs with purposeful animation state and publishes results after the deterministic delay', () => {
+    vi.useFakeTimers()
+    render(<GameShell />)
+    fireEvent.click(screen.getByRole('button', { name: 'Start simulation' }))
+    expect(document.querySelector('.simulation-running')).toBeInTheDocument()
+    act(() => { vi.advanceTimersByTime(900) })
+    expect(screen.getByText('Architecture evaluated')).toBeInTheDocument()
+  })
 
-  it.todo('resets the simulation to its initial state and clears the displayed result')
+  it('resets output and persisted scenario configuration', () => {
+    render(<GameShell />)
+    fireEvent.click(screen.getByRole('button', { name: 'Step simulation' }))
+    expect(window.localStorage.getItem('architecture-run:scenario')).not.toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Reset simulation' }))
+    expect(screen.getByText('Ready to simulate')).toBeInTheDocument()
+    expect(screen.getByText(/Run or step the simulation/)).toBeInTheDocument()
+    expect(window.localStorage.getItem('architecture-run:scenario')).toBeNull()
+  })
 })
