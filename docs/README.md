@@ -10,7 +10,7 @@
 
 ## Trạng thái
 
-Repository dùng React + TypeScript + Vite. MVP hiện có game shell responsive, system model state tái sử dụng được, simulation engine deterministic và UI tích hợp cho workload, architecture actions, purposeful playback animation, run/step/pause/reset, metrics trước/sau, explanations và localStorage persistence cho campaign configuration.
+Repository dùng React + TypeScript + Vite. MVP hiện có game shell responsive, system model state tái sử dụng được, simulation engine deterministic và UI tích hợp cho workload, architecture actions, purposeful playback animation, run/step/pause/reset, metrics trước/sau, explanations và validated localStorage persistence cho campaign configuration.
 
 ## Lệnh phát triển
 

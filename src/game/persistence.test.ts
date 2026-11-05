@@ -17,6 +17,16 @@ describe('scenario persistence', () => {
     saveScenario(storage, scenario); clearScenario(storage)
     expect(storage.getItem('architecture-run:scenario')).toBeNull()
   })
+
+  it.each([
+    '{}',
+    '{"requestsPerSecond":900}',
+    '{"requestsPerSecond":900,"readRatio":2,"dbCapacity":{"readRps":500,"writeRps":180},"scaleUpCapacity":{"readRps":0,"writeRps":0},"readReplicas":0,"shardCount":1,"shardDistribution":"even"}',
+  ])('falls back when saved JSON has an invalid scenario shape: %s', (saved) => {
+    const storage = new StorageMock()
+    storage.setItem('architecture-run:scenario', saved)
+    expect(loadScenario(storage, scenario)).toBe(scenario)
+  })
 })
 
 class StorageMock implements Storage {

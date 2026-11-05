@@ -5,7 +5,7 @@
 - Run enters a visible `REQUESTS → DATA → QUEUE` animation state and publishes the deterministic after snapshot after 900ms.
 - Pause cancels the pending publication and returns to ready state; Step publishes the same after snapshot immediately.
 - Reset clears the displayed result and localStorage campaign configuration.
-- Scenario configuration round-trips through localStorage; malformed data safely falls back to the baseline.
+- Scenario configuration round-trips through localStorage; malformed data, including valid JSON with an invalid shape, safely falls back to the baseline.
 - The animation is presentation-only; `simulateScenario` remains the sole source of metrics.
 
 ## Assumptions
@@ -21,7 +21,7 @@ npm test
 npm run build
 ```
 
-Tests cover run/pause, step, reset, animation state, and persistence round-trip/fallback/clear behavior.
+Tests cover run/pause, step, reset, animation state, persistence round-trip/fallback/clear behavior, and malformed saved shapes.
 
 ## Status
 
