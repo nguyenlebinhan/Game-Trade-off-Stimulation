@@ -1,8 +1,10 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { fireEvent } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 afterEach(cleanup)
+beforeEach(() => window.localStorage.clear())
+afterEach(() => window.localStorage.clear())
 import { GameShell } from './GameShell'
 
 describe('game shell', () => {
@@ -36,5 +38,23 @@ describe('game shell', () => {
     const toggle = screen.getByRole('button', { name: 'Start simulation' })
     fireEvent.click(toggle)
     expect(screen.getByRole('button', { name: 'Pause simulation' })).toBeInTheDocument()
+  })
+
+  it('opens an accessible campaign map with one playable level and locked future levels', () => {
+    render(<GameShell />)
+    fireEvent.click(screen.getByRole('button', { name: 'Open campaign map' }))
+    expect(screen.getByRole('dialog', { name: 'Cứu shop trước giờ flash sale' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Database overload/ })).toBeInTheDocument()
+    expect(screen.getByLabelText('Cache storm, locked, coming soon')).toBeInTheDocument()
+    expect(screen.getByLabelText('Queue backlog, locked, coming soon')).toBeInTheDocument()
+    expect(screen.getByText('Progress saved locally in this browser.')).toBeInTheDocument()
+  })
+
+  it('shows Feature 5 saved scenario progress in the map', () => {
+    window.localStorage.setItem('architecture-run:scenario', JSON.stringify({ requestsPerSecond: 1240, readRatio: 0.75, dbCapacity: { readRps: 500, writeRps: 180 }, scaleUpCapacity: { readRps: 0, writeRps: 0 }, readReplicas: 0, shardCount: 1, shardDistribution: 'even' }))
+    render(<GameShell />)
+    fireEvent.click(screen.getByRole('button', { name: 'Open campaign map' }))
+    expect(screen.getByText('Progress saved locally in this browser.')).toBeInTheDocument()
+    expect(screen.getByText('IN PROGRESS')).toBeInTheDocument()
   })
 })

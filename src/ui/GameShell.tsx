@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useReducer, useState } from 'react'
-import { Activity, CircleHelp, Database, Gauge, GitBranch, HardDrive, MousePointer2, Pause, Play, RotateCcw, Server, Settings, ShieldCheck, StepForward, Users } from 'lucide-react'
-import { flashSaleLevel } from '../game/level'
+import { Activity, CircleHelp, Database, Gauge, GitBranch, HardDrive, LockKeyhole, Map, MousePointer2, Pause, Play, RotateCcw, Server, Settings, ShieldCheck, StepForward, Users, X } from 'lucide-react'
+import { campaignLevels, flashSaleLevel } from '../game/level'
 import { ScenarioConfiguration, simulateScenario } from '../game/simulation-engine'
 import { clearScenario, loadScenario, saveScenario } from '../game/persistence'
 import { createInitialSystemState, systemStateReducer } from '../game/system-model'
@@ -22,6 +22,7 @@ export function GameShell() {
   const [hasResult, setHasResult] = useState(false)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [speed, setSpeed] = useState(1)
+  const [mapOpen, setMapOpen] = useState(false)
   const result = useMemo(() => simulateScenario(scenario), [scenario])
   const snapshot = result[phase]
   const selected = systemState.nodes.find((node) => node.id === systemState.selectedNodeId) ?? systemState.nodes[0]
@@ -33,7 +34,8 @@ export function GameShell() {
   const resetActions = () => changeScenario((current) => ({ ...current, scaleUpCapacity: { readRps: 0, writeRps: 0 }, readReplicas: 0, shardCount: 1, shardDistribution: 'even' }))
   const setDistribution = (kind: 'even' | 'hot-spot') => changeScenario((current) => ({ ...current, shardDistribution: kind === 'even' || current.shardCount === 1 ? 'even' : [0.6, ...Array.from({ length: current.shardCount - 1 }, () => 0.4 / (current.shardCount - 1))] }))
   return <main className={`game-shell ${running ? 'simulation-running' : ''}`}>
-    <header className="topbar"><div className="brand"><span className="brand-mark">◈</span><span>ARCHITECTURE RUN</span></div><div className="campaign-name">{flashSaleLevel.campaign}</div><div className="top-actions"><span className="status-pill"><span className="dot" /> LIVE</span><button aria-label="Help"><CircleHelp size={18} /></button><button aria-label="Settings"><Settings size={18} /></button></div></header>
+    <header className="topbar"><div className="brand"><span className="brand-mark">◈</span><span>ARCHITECTURE RUN</span></div><div className="campaign-name">{flashSaleLevel.campaign}</div><div className="top-actions"><span className="status-pill"><span className="dot" /> LIVE</span><button aria-label="Open campaign map" onClick={() => setMapOpen(true)}><Map size={18} /></button><button aria-label="Help"><CircleHelp size={18} /></button><button aria-label="Settings"><Settings size={18} /></button></div></header>
+    {mapOpen && <div className="map-backdrop" role="presentation" onClick={() => setMapOpen(false)}><section className="campaign-map" role="dialog" aria-modal="true" aria-labelledby="campaign-map-title" onClick={(event) => event.stopPropagation()}><div className="map-heading"><div><span className="eyebrow">CAMPAIGN MAP</span><h2 id="campaign-map-title">{flashSaleLevel.campaign}</h2></div><button className="close-map" aria-label="Close campaign map" onClick={() => setMapOpen(false)}><X size={18} /></button></div><p className="map-summary">{window.localStorage.getItem('architecture-run:scenario') ? 'Progress saved locally in this browser.' : 'Start the first level to save your progress locally.'}</p><div className="level-list">{campaignLevels.map((level) => level.status === 'playable' ? <button className="level-card current" key={level.id} onClick={() => setMapOpen(false)}><span className="level-number">{level.number}</span><span><strong>{level.title}</strong><small>{level.description}</small></span><span className="level-state">{window.localStorage.getItem('architecture-run:scenario') ? 'IN PROGRESS' : 'START'}</span></button> : <div className="level-card locked" key={level.id} aria-label={`${level.title}, locked, coming soon`}><span className="level-number"><LockKeyhole size={15} /></span><span><strong>{level.title}</strong><small>{level.description}</small></span><span className="level-state">LOCKED</span></div>)}</div></section></div>}
     <section className="mission-strip"><div><span className="eyebrow">MISSION 01 / INCIDENT RESPONSE</span><h1>{flashSaleLevel.mission}</h1></div><div className="timer"><span>TIME LEFT</span><strong>{flashSaleLevel.timeRemaining}</strong></div><div className="progress-wrap"><span>PROGRESS</span><div className="progress" role="progressbar" aria-label="Mission progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={flashSaleLevel.progress}><i style={{ width: `${flashSaleLevel.progress}%` }} /></div><b>{flashSaleLevel.progress}%</b></div></section>
     <div className="workspace">
       <aside className="task-panel"><div className="panel-heading"><span>OBJECTIVES</span><span className="counter">01 / 03</span></div>{flashSaleLevel.tasks.map((task, i) => <div className={`task ${i === 0 ? 'done' : i === 1 ? 'active' : ''}`} key={task}><span className="task-check">{i === 0 ? '✓' : i + 1}</span><span>{task}</span></div>)}<div className="hint"><Gauge size={17} /><span><strong>TIP</strong> Compare before and after to understand each trade-off.</span></div></aside>
